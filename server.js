@@ -32,7 +32,7 @@ function parseHeadersFromEnv(input) {
 // Configuration
 const CONFIG = {
   discordWebhook: process.env.DISCORD_WEBHOOK || "",
-  checkoutUrl: "https://www.showroomprive.com/panier.aspx",
+  checkoutUrl: "https://www.showroomprive.com/checkout/cart",
   cartReservationMinutes: 15,
   checkIntervalMs: 60 * 1000,
   // Showroomprivé auth headers (parsed from env or set individually)
@@ -257,7 +257,8 @@ function sendStockNotification(productInfo, offerId, size, quantity, price, prod
       { name: "📏 Taille", value: `**${size}**`, inline: true },
       { name: "📦 Quantité", value: `${quantity} dispo`, inline: true },
       { name: "💰 Prix", value: `${price}€`, inline: true },
-      { name: "🔗 Liens", value: `[Voir produit](${productUrl}) | [Panier](${CONFIG.checkoutUrl})`, inline: false }
+      { name: "🔗 Produit", value: `[Voir le produit](${productUrl})`, inline: true },
+      { name: "🛒 Checkout", value: `[Aller au panier](${CONFIG.checkoutUrl})`, inline: true }
     ],
     footer: { text: `Offer ID: ${offerId}` },
     timestamp: new Date().toISOString()
@@ -284,7 +285,8 @@ function sendCartNotification(productInfo, offerId, size, quantity, price, produ
       { name: "📏 Taille", value: `**${size}**`, inline: true },
       { name: "💰 Prix", value: `${price}€`, inline: true },
       { name: "⏰ CHECKOUT AVANT", value: `**${deadlineStr}**`, inline: false },
-      { name: "🔗 Checkout", value: `[Aller au panier](${CONFIG.checkoutUrl})`, inline: false }
+      { name: "🔗 Produit", value: `[Voir le produit](${productUrl})`, inline: true },
+      { name: "🛒 Checkout", value: `[Aller au panier](${CONFIG.checkoutUrl})`, inline: true }
     ],
     footer: { text: `Offer ID: ${offerId}` },
     timestamp: new Date().toISOString()
