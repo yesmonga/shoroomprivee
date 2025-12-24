@@ -1,0 +1,15 @@
+{
+  "name": "showroomprive-stock-monitor",
+  "version": "1.0.0",
+  "description": "Showroomprivé stock monitoring bot with Discord notifications",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

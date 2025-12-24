@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Showroomprivé - Stock Monitor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+      color: #1a1a1a;
+      padding: 20px;
+      padding-bottom: 120px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+      padding-top: 20px;
+    }
+
+    .logo {
+      margin-bottom: 8px;
+    }
+
+    .logo-text {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #1a1a1a;
+      line-height: 1.1;
+    }
+
+    .logo-prive {
+      font-size: 16px;
+      font-weight: 400;
+      letter-spacing: 6px;
+      color: #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .logo-dot {
+      width: 10px;
+      height: 10px;
+      background: #f28b82;
+      border-radius: 50%;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      font-weight: 500;
+      color: #666;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 8px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      margin-top: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      color: #666;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ffc107;
+      animation: pulse 2s infinite;
+    }
+
+    .status-dot.active {
+      background: #4ade80;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .card h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #1a1a1a;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: #999;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #eee;
+      border-radius: 12px;
+      font-size: 16px;
+      background: #fafafa;
+      color: #1a1a1a;
+      transition: all 0.2s;
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: #bbb;
+    }
+
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: #f28b82;
+      background: white;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+
+    .btn-primary {
+      background: #1a1a1a;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: #f5f5f5;
+      color: #1a1a1a;
+      border: 1px solid #eee;
+    }
+
+    .btn-success {
+      background: #f28b82;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #e57373;
+    }
+
+    .btn-danger {
+      background: #fff5f5;
+      color: #e57373;
+      border: 1px solid #ffcdd2;
+    }
+
+    .or-divider {
+      text-align: center;
+      margin: 20px 0;
+      position: relative;
+    }
+
+    .or-divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: #eee;
+    }
+
+    .or-divider span {
+      background: white;
+      padding: 0 16px;
+      position: relative;
+      color: #999;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .divider {
+      height: 1px;
+      background: #eee;
+      margin: 16px 0;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .loading.visible {
+      display: block;
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #eee;
+      border-top-color: #f28b82;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: #999;
+    }
+
+    .product-preview {
+      display: none;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid #eee;
+    }
+
+    .product-preview.visible {
+      display: block;
+    }
+
+    .product-info {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .product-info h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #1a1a1a;
+    }
+
+    .product-info .meta {
+      font-size: 14px;
+      color: #999;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .sizes-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .size-item {
+      padding: 14px 10px;
+      border-radius: 12px;
+      background: #fafafa;
+      border: 2px solid #eee;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+      position: relative;
+    }
+
+    .size-item:hover {
+      border-color: #ddd;
+    }
+
+    .size-item.out-of-stock {
+      border-color: #ffcdd2;
+      background: #fff5f5;
+    }
+
+    .size-item.in-stock {
+      border-color: #c8e6c9;
+      background: #f1f8f1;
+    }
+
+    .size-item.selected {
+      border: 3px solid #f28b82 !important;
+      background: #fff5f5 !important;
+      box-shadow: 0 0 20px rgba(242, 139, 130, 0.3);
+      transform: scale(1.05);
+    }
+
+    .size-item.selected .size-name {
+      color: #e57373;
+    }
+
+    .size-item.selected::after {
+      content: '✓';
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #f28b82;
+      color: white;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .size-item .size-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .size-item .stock-info {
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #999;
+      margin-top: 4px;
+    }
+
+    .size-item .price-info {
+      font-size: 12px;
+      color: #f28b82;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .size-item.out-of-stock .stock-info {
+      color: #e57373;
+    }
+
+    .size-item.in-stock .stock-info {
+      color: #4caf50;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin: 32px 0 16px;
+    }
+
+    .monitored-product {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .monitored-product h4 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #1a1a1a;
+    }
+
+    .info-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+
+    .info-item {
+      flex: 1;
+    }
+
+    .info-label {
+      font-size: 10px;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: block;
+    }
+
+    .info-item span:not(.info-label) {
+      font-size: 14px;
+      color: #1a1a1a;
+    }
+
+    .watching {
+      color: #f28b82 !important;
+      font-weight: 600;
+    }
+
+    .notified-badge {
+      color: #4caf50 !important;
+      font-weight: 600;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .actions .btn {
+      flex: 1;
+      padding: 12px;
+      font-size: 14px;
+      margin-top: 0;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      color: #999;
+    }
+
+    .empty-state .icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .token-section {
+      margin-top: 8px;
+    }
+
+    .token-section summary {
+      cursor: pointer;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #999;
+      padding: 8px 0;
+      outline: none;
+      list-style: none;
+    }
+
+    .token-section summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .token-section summary::before {
+      content: '+ ';
+    }
+
+    .token-section[open] summary::before {
+      content: '− ';
+    }
+
+    .token-section textarea {
+      width: 100%;
+      height: 150px;
+      margin-top: 16px;
+      padding: 12px;
+      border: 2px solid #eee;
+      border-radius: 8px;
+      background: #fafafa;
+      color: #1a1a1a;
+      font-family: monospace;
+      font-size: 11px;
+      resize: none;
+      outline: none;
+    }
+
+    .token-section textarea:focus {
+      border-color: #f28b82;
+      background: white;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1a1a1a;
+      color: white;
+      padding: 16px 24px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      max-width: calc(100% - 48px);
+      text-align: center;
+    }
+
+    .toast.visible {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast.error {
+      background: #e57373;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <div class="logo-text">SHOW<br>ROOM</div>
+      <div class="logo-prive"><span class="logo-dot"></span> PRIVÉ</div>
+    </div>
+    <div class="subtitle">Stock Monitor</div>
+    <div class="status" id="monitorStatus">
+      <span class="status-dot"></span>
+      <span>Chargement...</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Ajouter un produit</h2>
+    
+    <div class="form-group">
+      <label>URL du produit</label>
+      <input type="text" id="productUrl" placeholder="https://www.showroomprive.com/link/product/38450594">
+    </div>
+
+    <div class="or-divider"><span>ou</span></div>
+    
+    <div class="form-group">
+      <label>Product ID</label>
+      <input type="text" id="productId" placeholder="38450594" inputmode="numeric">
+    </div>
+    
+    <button class="btn btn-primary" id="fetchBtn" onclick="fetchProduct()">
+      Rechercher
+    </button>
+
+    <div class="loading" id="fetchLoading">
+      <div class="spinner"></div>
+      <div class="loading-text">Recherche en cours...</div>
+    </div>
+
+    <div class="product-preview" id="productPreview">
+      <div class="product-info" id="productInfo"></div>
+      
+      <div class="section-label">Sélectionner les tailles à surveiller</div>
+      <div class="sizes-list" id="sizesList"></div>
+      
+      <button class="btn btn-success" onclick="addProduct()">
+        Ajouter au monitoring
+      </button>
+    </div>
+  </div>
+
+  <div class="section-title">Produits surveillés</div>
+  <div class="monitored-products" id="monitoredProducts">
+    <div class="empty-state" id="emptyState">
+      <div class="icon">🛒</div>
+      <p>Aucun produit surveillé</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 24px;">
+    <details class="token-section">
+      <summary>Paramètres d'authentification</summary>
+      
+      <div class="token-status" id="tokenStatus"></div>
+      
+      <div class="form-group" style="margin-top: 12px;">
+        <label>Headers complets (copiez tout depuis l'app)</label>
+        <textarea id="headersInput" placeholder="Cookie: ...
+token: ...
+client_num: ...
+crm: ..."></textarea>
+      </div>
+      
+      <button class="btn btn-primary" onclick="updateHeaders()">
+        Mettre à jour les headers
+      </button>
+    </details>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let currentProduct = null;
+    let selectedSizes = new Set();
+
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast visible' + (isError ? ' error' : '');
+      setTimeout(() => toast.className = 'toast', 3000);
+    }
+
+    function parseUrl() {
+      const url = document.getElementById('productUrl').value.trim();
+      if (url) {
+        const match = url.match(/\/product\/(\d+)/);
+        if (match) {
+          document.getElementById('productId').value = match[1];
+        }
+      }
+    }
+
+    document.getElementById('productUrl').addEventListener('input', parseUrl);
+
+    async function fetchProduct() {
+      const url = document.getElementById('productUrl').value.trim();
+      const productId = document.getElementById('productId').value.trim();
+
+      if (!url && !productId) {
+        showToast('Veuillez entrer une URL ou un ID', true);
+        return;
+      }
+
+      document.getElementById('fetchBtn').disabled = true;
+      document.getElementById('fetchLoading').classList.add('visible');
+      document.getElementById('productPreview').classList.remove('visible');
+
+      try {
+        const response = await fetch('/api/products/fetch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url, productId })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Erreur lors de la recherche');
+        }
+
+        currentProduct = data;
+        selectedSizes.clear();
+        displayProductPreview(data);
+        
+      } catch (error) {
+        showToast(error.message, true);
+      } finally {
+        document.getElementById('fetchBtn').disabled = false;
+        document.getElementById('fetchLoading').classList.remove('visible');
+      }
+    }
+
+    function displayProductPreview(data) {
+      document.getElementById('productInfo').innerHTML = `
+        <h3>Produit ${data.productId}</h3>
+        <div class="meta">${data.productInfo.label || 'Choisissez une taille'}</div>
+      `;
+
+      const sizesList = document.getElementById('sizesList');
+      
+      if (data.sizes.length === 0) {
+        sizesList.innerHTML = '<div class="empty-state"><p>Aucune taille disponible</p></div>';
+      } else {
+        sizesList.innerHTML = data.sizes.map(size => {
+          const stockClass = size.stock > 0 ? 'in-stock' : 'out-of-stock';
+          const stockText = size.stock > 0 ? `${size.stock} dispo` : 'Rupture';
+          return `
+            <div class="size-item ${stockClass}" data-id="${size.offerId}" onclick="toggleSize(this, '${size.offerId}')">
+              <div class="size-name">${size.size}</div>
+              <div class="stock-info">${stockText}</div>
+              <div class="price-info">${size.price}€</div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('productPreview').classList.add('visible');
+    }
+
+    function toggleSize(element, offerId) {
+      if (selectedSizes.has(offerId)) {
+        selectedSizes.delete(offerId);
+        element.classList.remove('selected');
+      } else {
+        selectedSizes.add(offerId);
+        element.classList.add('selected');
+      }
+    }
+
+    async function addProduct() {
+      if (!currentProduct) return;
+
+      if (selectedSizes.size === 0) {
+        showToast('Sélectionnez au moins une taille', true);
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/products/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            productId: currentProduct.productId,
+            watchedSizes: Array.from(selectedSizes)
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Erreur');
+        }
+
+        showToast(`Surveillance activée pour ${data.watchedSizes.join(', ')}`);
+        
+        if (data.alreadyInStock && data.alreadyInStock.length > 0) {
+          setTimeout(() => showToast(`🚨 Déjà en stock: ${data.alreadyInStock.join(', ')}!`), 1500);
+        }
+        
+        document.getElementById('productPreview').classList.remove('visible');
+        document.getElementById('productUrl').value = '';
+        document.getElementById('productId').value = '';
+        currentProduct = null;
+        selectedSizes.clear();
+        
+        loadMonitoredProducts();
+
+      } catch (error) {
+        showToast(error.message, true);
+      }
+    }
+
+    async function loadMonitoredProducts() {
+      try {
+        const response = await fetch('/api/products');
+        const data = await response.json();
+
+        const statusEl = document.getElementById('monitorStatus');
+        const statusDot = statusEl.querySelector('.status-dot');
+        
+        if (data.isMonitoring && data.products.length > 0) {
+          statusDot.classList.add('active');
+          statusEl.querySelector('span:last-child').textContent = `${data.products.length} produit(s) surveillé(s)`;
+        } else {
+          statusDot.classList.remove('active');
+          statusEl.querySelector('span:last-child').textContent = 'En attente';
+        }
+
+        const container = document.getElementById('monitoredProducts');
+        
+        if (data.products.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="icon">🛒</div>
+              <p>Aucun produit surveillé</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = data.products.map(product => {
+          const watchedSizeNames = product.watchedSizes.map(id => {
+            const mapping = product.sizeMapping[id];
+            return mapping ? mapping.size : id;
+          }).join(', ');
+
+          const notifiedSizeNames = product.notified.map(id => {
+            const mapping = product.sizeMapping[id];
+            return mapping ? mapping.size : id;
+          }).join(', ');
+
+          return `
+            <div class="monitored-product">
+              <h4>Produit ${product.productId}</h4>
+              <div class="info-row">
+                <div class="info-item">
+                  <span class="info-label">Product ID</span>
+                  <span>${product.productId}</span>
+                </div>
+              </div>
+              <div class="info-row">
+                <div class="info-item">
+                  <span class="info-label">Surveillance</span>
+                  <span class="watching">${watchedSizeNames}</span>
+                </div>
+              </div>
+              ${notifiedSizeNames ? `
+              <div class="info-row">
+                <div class="info-item">
+                  <span class="info-label">Notifié</span>
+                  <span class="notified-badge">✓ ${notifiedSizeNames}</span>
+                </div>
+              </div>
+              ` : ''}
+              <div class="actions">
+                <button class="btn btn-secondary" onclick="resetProduct('${product.key}')">Reset</button>
+                <button class="btn btn-danger" onclick="removeProduct('${product.key}')">Supprimer</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      } catch (error) {
+        console.error('Error loading products:', error);
+      }
+    }
+
+    async function removeProduct(key) {
+      if (!confirm('Supprimer ce produit du monitoring?')) return;
+
+      try {
+        await fetch(`/api/products/${encodeURIComponent(key)}`, { method: 'DELETE' });
+        showToast('Produit supprimé');
+        loadMonitoredProducts();
+      } catch (error) {
+        showToast('Erreur lors de la suppression', true);
+      }
+    }
+
+    async function resetProduct(key) {
+      try {
+        await fetch(`/api/products/${encodeURIComponent(key)}/reset`, { method: 'POST' });
+        showToast('Notifications réinitialisées');
+        loadMonitoredProducts();
+      } catch (error) {
+        showToast('Erreur lors du reset', true);
+      }
+    }
+
+    async function updateHeaders() {
+      const headers = document.getElementById('headersInput').value.trim();
+      if (!headers) {
+        showToast('Veuillez entrer les headers', true);
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/config/headers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ headers })
+        });
+
+        if (response.ok) {
+          showToast('Headers mis à jour');
+          document.getElementById('headersInput').value = '';
+          updateTokenStatus();
+        } else {
+          throw new Error('Erreur');
+        }
+      } catch (error) {
+        showToast('Erreur lors de la mise à jour', true);
+      }
+    }
+
+    async function updateTokenStatus() {
+      try {
+        const response = await fetch('/health');
+        const data = await response.json();
+        
+        const statusEl = document.getElementById('tokenStatus');
+        if (data.hasAuth) {
+          statusEl.innerHTML = `
+            <div style="background: rgba(34, 197, 94, 0.2); border: 1px solid rgba(34, 197, 94, 0.4); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+              <div style="color: #22c55e; font-weight: 600; font-size: 12px;">✅ Auth configuré</div>
+            </div>
+          `;
+        } else {
+          statusEl.innerHTML = `
+            <div style="background: rgba(255, 107, 107, 0.2); border: 1px solid rgba(255, 107, 107, 0.4); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+              <div style="color: #ff6b6b; font-weight: 600; font-size: 12px;">⚠️ Aucune auth configurée</div>
+              <div style="color: rgba(255,255,255,0.6); font-size: 11px; margin-top: 4px;">Collez les headers de l'app</div>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Error fetching status:', error);
+      }
+    }
+
+    loadMonitoredProducts();
+    updateTokenStatus();
+    setInterval(loadMonitoredProducts, 30000);
+    setInterval(updateTokenStatus, 60000);
+  </script>
+</body>
+</html>
