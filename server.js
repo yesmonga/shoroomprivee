@@ -45,8 +45,23 @@ const CONFIG = {
 // Store monitored products
 const monitoredProducts = new Map();
 
+// Product history (persists across monitoring sessions)
+const productHistory = new Map();
+
 // Monitoring interval reference
 let monitoringInterval = null;
+
+// Add product to history
+function addToHistory(productId, productInfo, sizeMapping) {
+  productHistory.set(productId, {
+    productId,
+    title: productInfo.title || `Produit ${productId}`,
+    label: productInfo.label,
+    sizeMapping,
+    addedAt: new Date().toISOString(),
+    lastMonitored: new Date().toISOString()
+  });
+}
 
 // ============== SHOWROOMPRIVE API FUNCTIONS ==============
 
@@ -601,18 +616,23 @@ app.post('/api/products/add', async (req, res) => {
       }
     }
     
+    const productInfo = {
+      productId,
+      title: `Produit ${productId}`,
+      label: stockData.label
+    };
+    
     monitoredProducts.set(productId, {
       productId,
-      productInfo: {
-        productId,
-        title: `Produit ${productId}`,
-        label: stockData.label
-      },
+      productInfo,
       sizeMapping,
       watchedSizes: new Set(watchedSizes),
       previousStock: stockInfo,
       notified: new Set(alreadyInStock.length > 0 ? watchedSizes.filter(id => stockInfo[id]?.available > 0) : [])
     });
+    
+    // Save to history
+    addToHistory(productId, productInfo, sizeMapping);
 
     startMonitoring();
 
@@ -661,6 +681,44 @@ app.post('/api/products/:key/reset', (req, res) => {
   product.notified.clear();
   
   res.json({ success: true, message: 'Notifications reset' });
+});
+
+// ============== HISTORY API ==============
+
+// Get product history
+app.get('/api/history', (req, res) => {
+  const history = [];
+  for (const [productId, item] of productHistory) {
+    history.push({
+      productId: item.productId,
+      title: item.title,
+      label: item.label,
+      sizeMapping: item.sizeMapping,
+      addedAt: item.addedAt,
+      lastMonitored: item.lastMonitored,
+      isCurrentlyMonitored: monitoredProducts.has(productId)
+    });
+  }
+  // Sort by lastMonitored (most recent first)
+  history.sort((a, b) => new Date(b.lastMonitored) - new Date(a.lastMonitored));
+  res.json({ history });
+});
+
+// Clear history
+app.delete('/api/history', (req, res) => {
+  productHistory.clear();
+  res.json({ success: true, message: 'History cleared' });
+});
+
+// Remove single item from history
+app.delete('/api/history/:productId', (req, res) => {
+  const { productId } = req.params;
+  if (productHistory.has(productId)) {
+    productHistory.delete(productId);
+    res.json({ success: true, message: 'Item removed from history' });
+  } else {
+    res.status(404).json({ error: 'Item not found in history' });
+  }
 });
 
 // Update headers/auth

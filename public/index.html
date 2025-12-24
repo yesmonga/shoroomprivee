@@ -593,6 +593,14 @@
     </div>
   </div>
 
+  <div class="section-title">Historique</div>
+  <div class="history-products" id="historyProducts">
+    <div class="empty-state">
+      <div class="icon">📋</div>
+      <p>Aucun historique</p>
+    </div>
+  </div>
+
   <div class="card" style="margin-top: 24px;">
     <details class="token-section">
       <summary>Paramètres d'authentification</summary>
@@ -904,9 +912,93 @@ crm: ..."></textarea>
       }
     }
 
+    // ============== HISTORY FUNCTIONS ==============
+    
+    async function loadHistory() {
+      try {
+        const response = await fetch('/api/history');
+        const data = await response.json();
+        
+        const container = document.getElementById('historyProducts');
+        
+        if (data.history.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="icon">📋</div>
+              <p>Aucun historique</p>
+            </div>
+          `;
+          return;
+        }
+        
+        container.innerHTML = data.history.map(item => {
+          const sizes = item.sizeMapping ? Object.values(item.sizeMapping).map(s => s.size).join(', ') : '-';
+          const isMonitored = item.isCurrentlyMonitored;
+          
+          return `
+            <div class="monitored-product ${isMonitored ? 'currently-monitored' : ''}">
+              <h4>${item.title}</h4>
+              <div class="info-row">
+                <div class="info-item">
+                  <span class="info-label">Product ID</span>
+                  <span>${item.productId}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Tailles</span>
+                  <span>${sizes}</span>
+                </div>
+              </div>
+              ${isMonitored ? `
+                <div style="color: #4caf50; font-size: 12px; margin-top: 8px;">✓ Actuellement surveillé</div>
+              ` : `
+                <div class="actions">
+                  <button class="btn btn-success" onclick="quickSearch('${item.productId}')">Rechercher</button>
+                  <button class="btn btn-danger" onclick="removeFromHistory('${item.productId}')">Supprimer</button>
+                </div>
+              `}
+            </div>
+          `;
+        }).join('');
+        
+      } catch (error) {
+        console.error('Error loading history:', error);
+      }
+    }
+    
+    async function quickSearch(productId) {
+      document.getElementById('productId').value = productId;
+      document.getElementById('productUrl').value = '';
+      await fetchProduct();
+      // Scroll to top to see the product preview
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    async function removeFromHistory(productId) {
+      try {
+        await fetch(`/api/history/${encodeURIComponent(productId)}`, { method: 'DELETE' });
+        showToast('Supprimé de l\'historique');
+        loadHistory();
+      } catch (error) {
+        showToast('Erreur lors de la suppression', true);
+      }
+    }
+    
+    async function clearHistory() {
+      if (!confirm('Supprimer tout l\'historique?')) return;
+      try {
+        await fetch('/api/history', { method: 'DELETE' });
+        showToast('Historique effacé');
+        loadHistory();
+      } catch (error) {
+        showToast('Erreur', true);
+      }
+    }
+
     loadMonitoredProducts();
+    loadHistory();
     updateTokenStatus();
     setInterval(loadMonitoredProducts, 30000);
+    setInterval(loadHistory, 30000);
     setInterval(updateTokenStatus, 60000);
   </script>
 </body>
